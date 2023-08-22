@@ -116,8 +116,10 @@ extension SkillsTableViewCell: UICollectionViewDelegate,
             cell.configurate(text: array[indexPath.row], editMode: self.editMode)
         } else {
             cell.configurate(text: array[indexPath.row], editMode: false)
+            cell.accessibilityIdentifier = "addItem"
         }
         cell.deleteButton.tag = indexPath.row
+        cell.deleteButton.accessibilityIdentifier = "deleteButton\(indexPath.row)"
         
         return cell
     }
