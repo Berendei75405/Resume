@@ -27,6 +27,7 @@ final class AboutTableViewCell: UITableViewCell {
         textView.textColor = #colorLiteral(red: 0.2511924207, green: 0.2511924207, blue: 0.2511924207, alpha: 1)
         textView.font = .systemFont(ofSize: 17)
         textView.backgroundColor = .white
+        textView.accessibilityIdentifier = "textAboutMe"
         textView.isScrollEnabled = false
         textView.translatesAutoresizingMaskIntoConstraints = false
         
