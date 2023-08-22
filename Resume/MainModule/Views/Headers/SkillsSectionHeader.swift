@@ -32,6 +32,7 @@ final class SkillsSectionHeader: UICollectionReusableView {
         var but = UIButton()
         but.setImage(UIImage(named: "pensill"), for: .normal)
         but.translatesAutoresizingMaskIntoConstraints = false
+        but.accessibilityIdentifier = "editButton"
         
         return but
     }()
@@ -80,4 +81,3 @@ final class SkillsSectionHeader: UICollectionReusableView {
     }
     
 }
-
