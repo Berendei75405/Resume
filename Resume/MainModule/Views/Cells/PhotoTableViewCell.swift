@@ -1,130 +1,157 @@
 //
-//  PhotoCollectionViewCell.swift
+//  SkillsCollectionViewCell.swift
 //  Resume
 //
-//  Created by Никита Новгородцев on 04.08.2023.
+//  Created by user on 01.08.2023.
 //
 
 import UIKit
 
-final class PhotoTableViewCell: UITableViewCell {
-    static let identifier = "PhotoTableViewCell"
+protocol SkillsTableViewCellDataSource: AnyObject {
+    func numberOfItems() -> Int
+    func textForItem() -> [String]
+}
+
+protocol SkillsTableViewCellDelegate: AnyObject {
+    func editMode(editMode: Bool)
+    func cellWasSelect(index: Int)
+    func deleteCell(index: Int)
+}
+
+final class SkillsTableViewCell: UITableViewCell {
+    static let identifier = "SkillsTableViewCell"
+    var editMode = false
     
-    //MARK: - photoImageView
-    private var photoImageView: UIImageView = {
-        var img = UIImageView()
-        img.image = UIImage(named: "photo")
-        img.translatesAutoresizingMaskIntoConstraints = false
-        img.contentMode = .scaleAspectFill
-        img.frame.size = CGSize(width: 120, height: 120)
-        img.layer.cornerRadius = img.frame.width/2
-        img.clipsToBounds = true
-        
-        return img
-    }()
+    weak var dataSource: SkillsTableViewCellDataSource?
+    weak var delegate: SkillsTableViewCellDelegate?
     
-    //MARK: - fullNameLabel
-    private let fullNameLabel: UILabel = {
-        var lab = UILabel()
-        lab.translatesAutoresizingMaskIntoConstraints = false
-        lab.text = "Новгородцев Никита Александрович"
-        lab.lineBreakMode = .byWordWrapping
-        lab.numberOfLines = 0
-        lab.textAlignment = .center
-        lab.textColor = .black
-        lab.font = .boldSystemFont(ofSize: 24)
+    //MARK: - collectionView
+    lazy var collectionView: UICollectionView = {
+        var collection = UICollectionView(frame: .zero,
+                                          collectionViewLayout: createLayout())
         
-        return lab
-    }()
+        collection.translatesAutoresizingMaskIntoConstraints = false
+        collection.backgroundColor = .white
+        collection.isScrollEnabled = false
+        
+        //регистрация яйчеек
+        collection.register(SkillsCollectionViewCell.self,
+                            forCellWithReuseIdentifier: SkillsCollectionViewCell.identifier)
+        
+        //регистрация header
+        collection.register(SkillsSectionHeader.self,
+                            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SkillsSectionHeader.identifier)
     
-    //MARK: - personInfoLabel
-    private let personInfoLabel: UILabel = {
-        var lab = UILabel()
-        lab.translatesAutoresizingMaskIntoConstraints = false
-        lab.text = "Junior IOS-разработчик, опыт более 1 года"
-        lab.lineBreakMode = .byWordWrapping
-        lab.textAlignment = .center
-        lab.numberOfLines = 2
-        lab.textColor = #colorLiteral(red: 0.6537411213, green: 0.6508514285, blue: 0.6713269949, alpha: 1)
-        lab.font = .systemFont(ofSize: 14)
+        collection.dataSource = self
+        collection.delegate = self
         
-        return lab
-    }()
-    
-    //MARK: - locationImageView
-    private let locationImageView: UIImageView = {
-        var img = UIImageView()
-        img.translatesAutoresizingMaskIntoConstraints = false
-        img.image = UIImage(named: "location")
-        
-        return img
-    }()
-    
-    //MARK: - locationLabel
-    private let locationLabel: UILabel = {
-        var lab = UILabel()
-        lab.translatesAutoresizingMaskIntoConstraints = false
-        lab.text = "Барнаул"
-        lab.lineBreakMode = .byWordWrapping
-        lab.textAlignment = .center
-        lab.numberOfLines = 1
-        lab.textColor = #colorLiteral(red: 0.6537411213, green: 0.6508514285, blue: 0.6713269949, alpha: 1)
-        lab.font = .systemFont(ofSize: 14)
-        
-        return lab
+        return collection
     }()
     
     //MARK: - init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super .init(style: style, reuseIdentifier: reuseIdentifier)
         
-        contentView.backgroundColor = #colorLiteral(red: 0.9625495076, green: 0.9627465606, blue: 0.9688358903, alpha: 1)
+        //MARK: - collectionView constraints
+        contentView.addSubview(collectionView)
         
-        //MARK: - photoImageView constraints
-        contentView.addSubview(photoImageView)
         NSLayoutConstraint.activate([
-            photoImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
-            photoImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            photoImageView.widthAnchor.constraint(equalToConstant: 120),
-            photoImageView.heightAnchor.constraint(equalToConstant: 120)
+            collectionView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
-        
-        //MARK: - fullNameLabel constraints
-        contentView.addSubview(fullNameLabel)
-        NSLayoutConstraint.activate([
-            fullNameLabel.topAnchor.constraint(equalTo: photoImageView.bottomAnchor, constant: 16),
-            fullNameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: -32),
-            fullNameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
-        ])
-        
-        //MARK: - personInfoLabel constraints
-        contentView.addSubview(personInfoLabel)
-        NSLayoutConstraint.activate([
-            personInfoLabel.topAnchor.constraint(equalTo: fullNameLabel.bottomAnchor, constant: 4),
-            personInfoLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 32),
-            personInfoLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -32)
-        ])
-        
-        //MARK: - locationLabel constraints
-        contentView.addSubview(locationLabel)
-        NSLayoutConstraint.activate([
-            locationLabel.topAnchor.constraint(equalTo: personInfoLabel.bottomAnchor, constant: 3),
-            locationLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
-        ])
-        
-        //MARK: - locationImageView constraints
-        contentView.addSubview(locationImageView)
-        NSLayoutConstraint.activate([
-            locationImageView.topAnchor.constraint(equalTo: personInfoLabel.bottomAnchor),
-            locationImageView.trailingAnchor.constraint(equalTo: locationLabel.leadingAnchor),
-            locationImageView.widthAnchor.constraint(equalToConstant: 20),
-            locationImageView.heightAnchor.constraint(equalToConstant: 20)
-        ])
-        
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    //MARK: - createLayout
+    private func createLayout() -> UICollectionViewLayout {
+        UICollectionViewCompositionalLayout { sectionIndex, env in
+            switch sectionIndex {
+            case 0:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .estimated(80), heightDimension: .fractionalHeight(1))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(64))
+                
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+                group.contentInsets = .init(top: 16, leading: 16, bottom: .zero, trailing: 16)
+                group.interItemSpacing = .fixed(16)
+                
+                let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70))
+                let header: NSCollectionLayoutBoundarySupplementaryItem = .init(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+                
+                let section = NSCollectionLayoutSection(group: group)
+                section.boundarySupplementaryItems = [header]
+                section.contentInsets = .init(top: .zero, leading: .zero, bottom: 24, trailing: .zero)
+                
+                return section
+            default:
+                return NSCollectionLayoutSection(group: NSCollectionLayoutGroup(layoutSize: NSCollectionLayoutSize(widthDimension: .absolute(0), heightDimension: .absolute(0))))
+            }
+        }
+    }
 }
 
+//MARK: - extensions
+extension SkillsTableViewCell: UICollectionViewDelegate,
+                               UICollectionViewDataSource,
+                               SectionHeaderDelegateProtocol,
+                               SkillsCollectionViewCellDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return dataSource?.numberOfItems() ?? 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SkillsCollectionViewCell.identifier, for: indexPath) as? SkillsCollectionViewCell else { return UICollectionViewCell() }
+        
+        cell.delegate = self
+        
+        let array = dataSource?.textForItem() ?? []
+        if array.count != indexPath.row + 1 {
+            cell.configurate(text: array[indexPath.row], editMode: self.editMode)
+        } else {
+            cell.configurate(text: array[indexPath.row], editMode: false)
+            cell.accessibilityIdentifier = "addItem"
+        }
+        cell.deleteButton.tag = indexPath.row
+        cell.deleteButton.accessibilityIdentifier = "deleteButton\(indexPath.row)"
+        
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        switch indexPath.row {
+        case .zero:
+            guard let cell = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: SkillsSectionHeader.identifier, for: indexPath) as? SkillsSectionHeader else { return UICollectionReusableView() }
+            
+            cell.delegate = self
+            
+            return cell
+        default:
+            return UICollectionReusableView()
+        }
+    }
+    
+    //MARK: - SectionHeaderDelegateProtocol
+    func editTap(editMode: Bool) {
+        self.editMode.toggle()
+        self.delegate?.editMode(editMode: editMode)
+        collectionView.reloadData()
+    }
+    
+    //MARK: - SkillsCollectionViewCellDelegate
+    func itemWasSelect(index: Int) {
+        self.delegate?.cellWasSelect(index: index)
+    }
+    
+    func deleteCell(index: Int) {
+        self.delegate?.deleteCell(index: index)
+        collectionView.reloadData()
+    }
+    
+}
