@@ -168,6 +168,7 @@ extension MainViewController: UITableViewDelegate,
             let alertController = UIAlertController(title: "Добавление навыка", message: "Введите название навыка которым вы владеете", preferredStyle: .alert)
             alertController.addTextField { textField in
                 textField.placeholder = "Введите название"
+                textField.accessibilityIdentifier = "Введите название"
                 textField.delegate = self
             }
             let actionCancel = UIAlertAction(title: "Отмена", style: .cancel)
