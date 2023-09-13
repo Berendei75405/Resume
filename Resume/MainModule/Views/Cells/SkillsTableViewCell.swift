@@ -81,7 +81,7 @@ final class SkillsTableViewCell: UITableViewCell {
                 group.contentInsets = .init(top: 16, leading: 16, bottom: .zero, trailing: 16)
                 group.interItemSpacing = .fixed(16)
                 
-                let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70))
+                let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(32))
                 let header: NSCollectionLayoutBoundarySupplementaryItem = .init(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
                 
                 let section = NSCollectionLayoutSection(group: group)
