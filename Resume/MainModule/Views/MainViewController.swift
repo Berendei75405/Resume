@@ -40,6 +40,8 @@ final class MainViewController: UIViewController {
         return table
     }()
     
+    private var editMode: Bool = false
+    
     //MARK: - viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -73,6 +75,49 @@ final class MainViewController: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
         
+    }
+    
+    //MARK: - returnHeightContent
+    func returnHeightContent(arrayOfStrings: [String]) -> CGFloat {
+        //размер экрана
+        let widthScreen = view.frame.width - 32
+        let sectionHeader: CGFloat = 32
+        var totalLines: CGFloat = 1
+        var currentWidth: CGFloat = 0
+        //в самой ячейке
+        let leadingAndTrailing: CGFloat = 32
+        let heightCell: CGFloat = 64
+        let spacingBetwinCells: CGFloat = 16
+        for str in arrayOfStrings {
+            let font = UIFont.systemFont(ofSize: 15)
+            let stringWidth = (str as NSString).size(withAttributes: [NSAttributedString.Key.font: font]).width
+            
+            //поместится ли элемент в строку
+            if currentWidth < widthScreen {
+                if currentWidth == 0 {
+                    currentWidth += stringWidth + leadingAndTrailing
+                } else {
+                    currentWidth += stringWidth + leadingAndTrailing + spacingBetwinCells
+                }
+            }
+            
+            if editMode {
+                currentWidth += 36
+            }
+            
+            //если элемент быльше ширины экрана, удалим его и добавим новую линию
+            if currentWidth > widthScreen {
+                currentWidth = 0
+                currentWidth += stringWidth
+                totalLines += 1
+            } else if currentWidth == widthScreen {
+                totalLines += 1
+                currentWidth = 0
+            }
+            print("Всего линий ", totalLines)
+        }
+        print(currentWidth)
+        return (totalLines * heightCell) + sectionHeader
     }
     
     //MARK: - keyboardWillShow
@@ -130,7 +175,7 @@ extension MainViewController: UITableViewDelegate,
         case .zero:
             return 290
         case 1:
-            return 360
+            return returnHeightContent(arrayOfStrings: viewModel.skills)
         case 2:
             let padding = CGFloat(16)
             let header = CGFloat(32)
@@ -161,6 +206,9 @@ extension MainViewController: UITableViewDelegate,
         } else {
             viewModel.skills.removeAll { $0 == "+" }
         }
+        self.editMode = editMode
+        tableView.beginUpdates()
+        tableView.endUpdates()
     }
     
     func cellWasSelect(index: Int) {
